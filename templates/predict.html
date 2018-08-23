@@ -18,8 +18,34 @@
 
 </head>
 <body>
-<div class="container">
 
+
+<div class="container">
+    <button type="button" class="btn btn-info" data-toggle="collapse"
+            data-target="#demo">Settings
+    </button>
+    <div class="col-md-6">
+        <div id="demo" class="collapse in">
+            <div style="padding: 10px 10px 10px;">
+                <form class="bs-example bs-example-form" role="form">
+                    <div class="input-group">
+                        <span class="input-group-addon">grpc_server_ip</span>
+                        <input id="grpc_server_ip" type="text" class="form-control" placeholder="192.168.1.1">
+                    </div>
+                    <br>
+                    <div class="input-group">
+                        <span class="input-group-addon">grpc_port</span>
+                        <input id="grpc_server_port" type="text" class="form-control" placeholder="9000">
+                    </div>
+                    <br>
+                    <div class="input-group">
+                        <span class="input-group-addon">grpc_timeout</span>
+                        <input id="grpc_timeout" type="text" class="form-control" placeholder="60.0">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-6">
             <h2>Guess Cat</h2>
@@ -52,6 +78,29 @@
 
     </div>
 </div>
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                    &times;
+                </button>
+                <h4 class="modal-title" id="myModalLabel">
+                    提示
+                </h4>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                </button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+
+
 </body>
 
 <script>
@@ -73,6 +122,13 @@
         window.location.reload();
     }
 
+    function showTip(msg){
+        {#alert($('#myModal div .modal-body').val())#}
+        $('#myModal div .modal-body').empty()
+        $('#myModal div .modal-body').append(msg)
+        $('#myModal').modal('show')
+    }
+
     function doPredict() {
         if ($('#img_name').val() == '') {
             alert('image name not found.')
@@ -82,15 +138,22 @@
         $.post("/classify",
             {
                 filename: $('#img_name').val(),
+                grpc_server_ip: $('#grpc_server_ip').val(),
+                grpc_server_port: $('#grpc_server_port').val(),
+                grpc_timeout: $('#grpc_timeout').val()
             },
             function (data, status) {
                 if (data.status == 'success') {
                     $("#table-result tbody").empty()
-                    alert('done')
+                    showTip('predict done !')
+                    {#alert('done')#}
                     for (let i = 0; i < data.data.length; i++) {
                         $("#table-result tbody").append('<tr><td>' + (i + 1) + '</td><td>' + data.data[i].k + '</td><td>' + data.data[i].v + '</td></tr>')
                     }
                     UIpredicted();
+                }
+                else{
+                    showTip(data.message)
                 }
             }
         )

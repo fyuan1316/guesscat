@@ -1,0 +1,10 @@
+numpy==1.14.5
+grpcio==1.14.1
+tensorflow_serving_api==1.10.1
+tensorflow==1.8.0
+Flask==1.0.2
+requests==2.18.4
+tornado==4.5.2
+scipy==1.0.1
+grpc==0.3-19
+Pillow==4.2.1

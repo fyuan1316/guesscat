@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-
 from flask import Flask, request, render_template, url_for, redirect, abort, jsonify
 import logging
 import os
@@ -39,7 +38,6 @@ def index():
 @app.route('/')
 def predict():
     logger.info('in predict function')
-
     return render_template('predict.html')
 
 
@@ -66,35 +64,49 @@ def ajax_upload():
 def doclassify():
     logger.info('in doClassify function')
     filename = request.form['filename']
-    r = classify(path + filename)
-    scores = r.outputs['scores'].float_val
-    lables = r.outputs['labels'].string_val
-    tuple_list = []
-    for i in range(len(scores)):
-        print(i, scores[i])
-        # tuple_list.append(( lables[i],scores[i]))
-        tuple_list.append({'k': lables[i], 'v': scores[i]})
+    server = request.form['grpc_server_ip']
+    port = request.form['grpc_server_port']
+    timeout = request.form['grpc_timeout']
 
-    new_tlist = sorted(
-        tuple_list,
-        cmp=lambda x,
-        y: cmp(
-            x['v'],
-            y['v']),
-        reverse=True)
-    result = {'data': new_tlist, 'status': 'success'}
+    status, msg = 'success', ''
+
+    try:
+        r = classify(path + filename, server, port, timeout)
+    except grpc.RpcError as err:
+        status = 'error'
+        if err.code() == grpc.StatusCode.UNAVAILABLE:
+            msg = 'connect failed.'
+    except Exception as err:
+        status = 'error'
+        msg = 'grpc error: '+err.code()
+
+    tuple_list, new_tlist = [], []
+
+    if status == 'success':
+        scores = r.outputs['scores'].float_val
+        lables = r.outputs['labels'].string_val
+
+        for i in range(len(scores)):
+            print(i, scores[i])
+            tuple_list.append({'k': lables[i], 'v': scores[i]})
+        new_tlist = sorted(
+            tuple_list,
+            cmp=lambda x, y: cmp(x['v'], y['v']), reverse=True)
+
+    result = {'data': new_tlist, 'status': status, 'message': msg}
     return jsonify(result)
 
 
-def classify(file_path):
-    host = app.config['grpc_server']
-    port = app.config['grpc_port']
+def classify(file_path, _server, _port, _timeout):
+    host = _server if _server else app.config['grpc_server']
+    port = _port if _port else app.config['grpc_port']
+    grpc_timeout = _timeout if _timeout else app.config['grpc_timeout']
 
     img_height = app.config['img_height']
     img_width = app.config['img_width']
     input_mean = app.config['input_mean']
     input_std = app.config['input_std']
-    grpc_timeout = app.config['grpc_timeout']
+
     print('timeout:{}'.format(grpc_timeout))
 
     model_name = app.config['model_name']
@@ -120,7 +132,8 @@ def classify(file_path):
             images, shape=[
                 1, img_height, img_width, 3]))
 
-    result = stub.Predict(request, grpc_timeout)  # 60 secs timeout
+    result = stub.Predict(request, float(grpc_timeout))  # 60 secs timeout
+
     return result
 
 

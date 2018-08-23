@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "cat-prediction-web.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "cat-prediction-web.name" . }}
+    chart: {{ template "cat-prediction-web.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ template "cat-prediction-web.name" . }}
+    release: {{ .Release.Name }}

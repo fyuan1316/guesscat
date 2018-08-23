@@ -1,0 +1,69 @@
+---
+# Source: cat-prediction-web/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: z-cat-prediction-web
+  labels:
+    app: cat-prediction-web
+    chart: cat-prediction-web-0.1.0
+    release: z
+    heritage: Tiller
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: cat-prediction-web
+    release: z
+
+---
+# Source: cat-prediction-web/templates/deployment.yaml
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: z-cat-prediction-web
+  labels:
+    app: cat-prediction-web
+    chart: cat-prediction-web-0.1.0
+    release: z
+    heritage: Tiller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cat-prediction-web
+      release: z
+  template:
+    metadata:
+      labels:
+        app: cat-prediction-web
+        release: z
+    spec:
+      containers:
+        - name: cat-prediction-web
+          image: "index.alauda.cn/alaudaorg/cat-prediction-web:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {}
+            
+
+---
+# Source: cat-prediction-web/templates/ingress.yaml
+
+
