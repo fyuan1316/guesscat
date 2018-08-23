@@ -7,7 +7,7 @@ replicaCount: 1
 image:
   repository: index.alauda.cn/alaudaorg/cat-prediction-web
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 web:
   grpc_server: 150.109.69.83
