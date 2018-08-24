@@ -4,6 +4,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: z-cat-prediction-web
+  namespace: max
   labels:
     app: cat-prediction-web
     chart: cat-prediction-web-0.1.0
@@ -26,6 +27,7 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: z-cat-prediction-web
+  namespace: max
   labels:
     app: cat-prediction-web
     chart: cat-prediction-web-0.1.0
@@ -44,12 +46,18 @@ spec:
         release: z
     spec:
       containers:
-        - name: cat-prediction-web
+        - args:
+          - python 
+          - /guesscat/starter.py
+          - --grpc_server=150.109.69.83
+          - --grpc_port=31092
+          - --grpc_timeout=60
+          name: cat-prediction-web
           image: "index.alauda.cn/alaudaorg/cat-prediction-web:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
-              containerPort: 80
+              containerPort:  5000
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -65,5 +73,23 @@ spec:
 
 ---
 # Source: cat-prediction-web/templates/ingress.yaml
-
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: z-cat-prediction-web
+  namespace: max
+  labels:
+    app: cat-prediction-web
+    chart: cat-prediction-web-0.1.0
+    release: z
+    heritage: Tiller
+spec:
+  rules:
+    - host: cat-predict.local
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: z-cat-prediction-web
+              servicePort: http
 

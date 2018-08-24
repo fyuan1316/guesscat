@@ -67,11 +67,13 @@ def doclassify():
     server = request.form['grpc_server_ip']
     port = request.form['grpc_server_port']
     timeout = request.form['grpc_timeout']
+    model_signature_name = request.form['model_signature_name']
+    model_name = request.form['model_name']
 
     status, msg = 'success', ''
 
     try:
-        r = classify(path + filename, server, port, timeout)
+        r = classify(path + filename, server, port, timeout,model_name,model_signature_name)
     except grpc.RpcError as err:
         status = 'error'
         if err.code() == grpc.StatusCode.UNAVAILABLE:
@@ -97,10 +99,12 @@ def doclassify():
     return jsonify(result)
 
 
-def classify(file_path, _server, _port, _timeout):
+def classify(file_path, _server, _port, _timeout,_model,_signature):
     host = _server if _server else app.config['grpc_server']
     port = _port if _port else app.config['grpc_port']
     grpc_timeout = _timeout if _timeout else app.config['grpc_timeout']
+    model_name = _model if _model else app.config['model_name']
+    model_signature_name = _signature if _signature else app.config['model_signature_name']
 
     img_height = app.config['img_height']
     img_width = app.config['img_width']
@@ -109,8 +113,7 @@ def classify(file_path, _server, _port, _timeout):
 
     print('timeout:{}'.format(grpc_timeout))
 
-    model_name = app.config['model_name']
-    model_signature_name = app.config['model_signature_name']
+   
 
     # image = img
     image = imread(file_path)

@@ -24,10 +24,12 @@
     <button type="button" class="btn btn-info" data-toggle="collapse"
             data-target="#demo">Settings
     </button>
-    <div class="col-md-6">
+    <div class="col-md-13">
         <div id="demo" class="collapse in">
             <div style="padding: 10px 10px 10px;">
-                <form class="bs-example bs-example-form" role="form">
+                <form class="form-inline pul-right"" role="form">
+                <!-- <div class="form-group"> -->
+                    <div class="col-md-6">
                     <div class="input-group">
                         <span class="input-group-addon">grpc_server_ip</span>
                         <input id="grpc_server_ip" type="text" class="form-control" placeholder="192.168.1.1">
@@ -39,9 +41,26 @@
                     </div>
                     <br>
                     <div class="input-group">
-                        <span class="input-group-addon">grpc_timeout</span>
+                        <span class="input-group-addon" >grpc_timeout</span>
                         <input id="grpc_timeout" type="text" class="form-control" placeholder="60.0">
                     </div>
+                </div>
+                <!-- </div> -->
+                    <br>
+                    <div class="col-md-6" style="margin-top: -40px">
+                <!-- <div class="form-group"> -->
+                    <div class="input-group">
+                        <span class="input-group-addon">model_name</span>
+                        <input id="model_name" type="text" class="form-control" placeholder="cat-prediction">
+                    </div>
+                    <br>
+                    <div class="input-group">
+                        <span class="input-group-addon">model_signature_name</span>
+                        <input id="model_signature_name" type="text" class="form-control" placeholder="predict_images">
+                    </div>
+                    <br>
+                    
+                </div>
                 </form>
             </div>
         </div>
@@ -140,7 +159,9 @@
                 filename: $('#img_name').val(),
                 grpc_server_ip: $('#grpc_server_ip').val(),
                 grpc_server_port: $('#grpc_server_port').val(),
-                grpc_timeout: $('#grpc_timeout').val()
+                grpc_timeout: $('#grpc_timeout').val(),
+                model_signature_name: $('#model_signature_name').val(),
+                model_name: $('#model_name').val(),
             },
             function (data, status) {
                 if (data.status == 'success') {
